@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { io } from "socket.io-client";
+import Square from "./Square";
+import '../styling/Game.css'
 
 const renderFrom = [
   [1, 2, 3],
@@ -65,7 +67,6 @@ const Game = () => {
 
   useEffect(() => {
     const newSocket = io("http://localhost:6001");
-    console.log("New socket connected-- ", newSocket);
     newSocket?.emit("request-to-play", {
       playerName: playerName,
     });
@@ -78,6 +79,10 @@ const Game = () => {
       setFinishetState(winner);
     }
   }, [gameState]);
+
+  socket?.on("opponentLeftMatch", () => {
+    setFinishetState("opponentLeftMatch");
+  });
 
   socket?.on("playerMoveFromServer", (data) => {
     const id = data.state.id;
@@ -104,10 +109,78 @@ const Game = () => {
     setOpponentName(data.opponentName);
   });
 
-  console.log("me--", playerName, playingAs);
-  console.log("opponent -- ", opponentName);
+  if (playOnline && !opponentName) {
+    return (
+      <div className="waiting">
+        <p>Waiting for opponent</p>
+      </div>
+    );
+  }
 
-  return <div>Game !!</div>;
+
+  return (
+    <div className="main-div">
+      <div className="move-detection">
+        <div
+          className={`left ${
+            currentPlayer === playingAs ? "current-move-" + currentPlayer : ""
+          }`}
+        >
+          {playerName}
+        </div>
+        <div
+          className={`right ${
+            currentPlayer !== playingAs ? "current-move-" + currentPlayer : ""
+          }`}
+        >
+          {opponentName}
+        </div>
+      </div>
+      <div>
+        <h1 className="game-heading water-background">Tic Tac Toe</h1>
+        <div className="square-wrapper">
+          {gameState.map((arr, rowIndex) =>
+            arr.map((e, colIndex) => {
+              return (
+                <Square
+                  socket={socket}
+                  playingAs={playingAs}
+                  gameState={gameState}
+                  finishedArrayState={finishedArrayState}
+                  finishedState={finishedState}
+                  currentPlayer={currentPlayer}
+                  setCurrentPlayer={setCurrentPlayer}
+                  setGameState={setGameState}
+                  id={rowIndex * 3 + colIndex}
+                  key={rowIndex * 3 + colIndex}
+                  currentElement={e}
+                />
+              );
+            })
+          )}
+        </div>
+        {finishedState &&
+          finishedState !== "opponentLeftMatch" &&
+          finishedState !== "draw" && (
+            <h3 className="finished-state">
+              {finishedState === playingAs ? "You " : opponentName} won the
+              game
+            </h3>
+          )}
+        {finishedState &&
+          finishedState !== "opponentLeftMatch" &&
+          finishedState === "draw" && (
+            <h3 className="finished-state">It's a Draw</h3>
+          )}
+      </div>
+      {!finishedState && opponentName && (
+        <h2>You are playing against {opponentName}</h2>
+      )}
+      {finishedState && finishedState === "opponentLeftMatch" && (
+        <h2>You won the match, Opponent has left</h2>
+      )}
+    </div>
+  );
 };
 
 export default Game;
