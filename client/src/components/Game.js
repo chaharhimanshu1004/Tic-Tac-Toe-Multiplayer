@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import { io } from "socket.io-client";
 import Square from "./Square";
 import '../styling/Game.css'
+import {GlobeDemo}  from "./Globe";
+
 
 const renderFrom = [
   [1, 2, 3],
@@ -111,33 +113,36 @@ const Game = () => {
 
   if (playOnline && !opponentName) {
     return (
-      <div className="waiting">
-        <p>Waiting for opponent</p>
+      <div>
+        <GlobeDemo/>
+        
       </div>
+      
     );
   }
 
 
   return (
-    <div className="main-div">
+    <div className="w-screen  h-screen bg-[#000000] p-4 text-white">
+    <div className="main-div ">
       <div className="move-detection">
         <div
           className={`left ${
             currentPlayer === playingAs ? "current-move-" + currentPlayer : ""
-          }`}
+          } font-semibold`}
         >
           {playerName}
         </div>
         <div
           className={`right ${
             currentPlayer !== playingAs ? "current-move-" + currentPlayer : ""
-          }`}
+          } font-semibold`}
         >
           {opponentName}
         </div>
       </div>
       <div>
-        <h1 className="game-heading water-background">Tic Tac Toe</h1>
+        <h1 className="game-heading water-background font-bold">Tic Tac Toe</h1>
         <div className="square-wrapper">
           {gameState.map((arr, rowIndex) =>
             arr.map((e, colIndex) => {
@@ -174,11 +179,12 @@ const Game = () => {
           )}
       </div>
       {!finishedState && opponentName && (
-        <h2>You are playing against {opponentName}</h2>
+        <h2 className="font-semibold mt-3 text-lg">You are playing against {opponentName}</h2>
       )}
       {finishedState && finishedState === "opponentLeftMatch" && (
         <h2>You won the match, Opponent has left</h2>
       )}
+    </div>
     </div>
   );
 };
